@@ -82,8 +82,8 @@ public class Node implements INode {
 
     public static void main(String[] args) {
         INode x=new Node();
-        INode y=new Node();
-        x.setParent(y);
-        System.out.printf("%s %s %s ",y.getLeftChild(),y.getRightChild(),x.getParent());
+        IRedBlackTree y=new RedBlackTree();
+
+        System.out.printf("%s %s  ",y,y.getRoot());
     }
 }
