@@ -9,9 +9,7 @@ public class Node implements INode {
     @Override
     public void setParent(INode parent) {
     this.parent=parent;
-    if(parent.getColor()==RED){
-        this.setColor(BLACK);
-    }
+
     }
 
     @Override
@@ -81,8 +79,9 @@ public class Node implements INode {
     }
 
     public static void main(String[] args) {
-        INode x=new Node();
+
         IRedBlackTree y=new RedBlackTree();
+
 
         System.out.printf("%s %s  ",y,y.getRoot());
     }

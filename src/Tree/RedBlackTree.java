@@ -38,8 +38,54 @@ public class RedBlackTree implements  IRedBlackTree {
 
     @Override
     public boolean delete(Comparable key) {
+        root = deleteRec(root, key);
+
         return false;
     }
+    INode deleteRec(INode root, Comparable key)
+    {
+        /* Base Case: If the tree is empty */
+        if (root == null)  return root;
+
+        /* Otherwise, recur down the tree */
+        if (key.compareTo(root.getKey())<0)
+            root.setLeftChild( deleteRec(root.getLeftChild(), key));
+        else if (key.compareTo(root.getKey())>0)
+            root.setRightChild( deleteRec(root.getRightChild(), key));
+
+            // if key is same as root's key, then This is the node
+            // to be deleted
+        else
+        {
+            // node with only one child or no child
+            if (root.getLeftChild() == null)
+                return root.getRightChild();
+            else if (root.getRightChild() == null)
+                return root.getLeftChild();
+
+            // node with two children: Get the inorder successor (smallest
+            // in the right subtree)
+            root.setKey(minValue(root.getRightChild()));
+
+            // Delete the inorder successor
+            root.setRightChild(deleteRec(root.getRightChild(), root.getKey()));
+        }
+
+
+        return root;
+    }
+
+    Comparable minValue(INode root)
+    {
+        Comparable minv = root.getKey();
+        while (root.getLeftChild() != null)
+        {
+            minv = root.getLeftChild().getKey();
+            root = root.getLeftChild();
+        }
+        return minv;
+    }
+
 
 
     public void rightRotate(IRedBlackTree tree, INode y){
