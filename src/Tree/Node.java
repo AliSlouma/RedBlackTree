@@ -5,8 +5,8 @@ import Tree.INode;
 public class Node implements INode {
     INode leftChild=null,rightChild=null,parent=null;
     Object value;
-    Comparable key;
-    boolean color=BLACK;
+    Comparable key =null;
+    boolean color;
     @Override
     public void setParent(INode parent) {
     this.parent=parent;
@@ -66,7 +66,7 @@ public class Node implements INode {
 
     @Override
     public void setColor(boolean color) {
-    if (color=true){
+    if (color==true){
         this.color=RED;
     }
     else{
@@ -76,14 +76,9 @@ public class Node implements INode {
 
     @Override
     public boolean isNull() {
+        if(this.key == null)
+            return true;
         return false;
     }
 
-    public static void main(String[] args) {
-
-        IRedBlackTree y=new RedBlackTree();
-
-
-        System.out.printf("%s %s  ",y,y.getRoot());
-    }
 }
