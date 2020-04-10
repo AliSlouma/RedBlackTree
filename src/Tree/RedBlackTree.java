@@ -1,13 +1,11 @@
 package Tree;
 
-public class RedBlackTree implements  IRedBlackTree {
-    INode root=null;
-    public void RedBlackTree(){
+import java.awt.*;
 
-        root.setColor(INode.BLACK);
-    }
-    @Override
-    public INode getRoot() {
+public class RedBlackTree implements  IRedBlackTree {
+    INode root = null;
+    public INode getRoot()
+    {
         return this.root;
     }
 
@@ -21,9 +19,22 @@ public class RedBlackTree implements  IRedBlackTree {
 
     }
 
-    @Override
-    public Object search(Comparable key) {
+
+    public Object searchRec(INode root, Comparable key) {
+        if(root != null){
+            if(root.getKey().compareTo(key)==0){
+                return  root.getValue();
+            }else if(root.getKey().compareTo(key) <0){
+                return searchRec(root.getRightChild(),key);
+            }else if(root.getKey().compareTo(key) > 0){
+                return searchRec(root.getLeftChild(),key);
+            }
+        }
         return null;
+    }
+
+    public Object search(Comparable key) {
+        return searchRec(this.root,key);
     }
 
     @Override
@@ -31,12 +42,35 @@ public class RedBlackTree implements  IRedBlackTree {
         return false;
     }
 
-    @Override
-    public void insert(Comparable key, Object value) {
+    public INode insertRec(INode root , Comparable key , Object value){
+        if(root== null){
+            root = new Node();
+            root.setKey(key);
+            root.setValue(value);
+            root.setColor(INode.RED);
+
+            if(this.root == null){
+                root.setColor(INode.BLACK);
+            }
+            return root;
+        }
+        if(root.getKey().compareTo(key)<0){
+            root.setRightChild(insertRec(root.getRightChild(),key,value));
+        }
+        else if(root.getKey().compareTo(key)>0){
+            root.setLeftChild(insertRec(root.getLeftChild(),key,value));
+        }
+
+        return root;
+
 
     }
 
-    @Override
+    public void insert(Comparable key, Object value) {
+
+        root = insertRec(this.root,key,value);
+
+    }
     public boolean delete(Comparable key) {
         root = deleteRec(root, key);
 
@@ -128,3 +162,19 @@ public class RedBlackTree implements  IRedBlackTree {
     }
 }
 
+    public static void main(String[] args) {
+
+        RedBlackTree tree = new RedBlackTree();
+
+        tree.insert(50,1);
+        tree.insert(30,2);
+        tree.insert(20,23);
+        tree.insert(40,32);
+        tree.insert(70,233);
+        tree.insert(60,2333);
+        tree.insert(80,23333);
+
+
+        System.out.println(tree.search(70));
+    }
+}
