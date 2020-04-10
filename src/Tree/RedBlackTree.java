@@ -103,8 +103,8 @@ public class RedBlackTree implements  IRedBlackTree {
 
             // node with two children: Get the inorder successor (smallest
             // in the right subtree)
-            root.setKey(minValue(root.getRightChild()));
-
+            root.setKey(minKey(root.getRightChild()));
+            root.setValue(minValue(root.getRightChild()));
             // Delete the inorder successor
             root.setRightChild(deleteRec(root.getRightChild(), root.getKey()));
         }
@@ -113,7 +113,7 @@ public class RedBlackTree implements  IRedBlackTree {
         return root;
     }
 
-    Comparable minValue(INode root)
+    Comparable minKey(INode root)
     {
         Comparable minv = root.getKey();
         while (root.getLeftChild() != null)
@@ -123,7 +123,18 @@ public class RedBlackTree implements  IRedBlackTree {
         }
         return minv;
     }
-
+    Object minValue(INode root)
+    {
+        Comparable minv = root.getKey();
+        Object val=root.getValue();
+        while (root.getLeftChild() != null)
+        {
+            minv = root.getLeftChild().getKey();
+            val=root.getLeftChild().getValue();
+            root = root.getLeftChild();
+        }
+        return val;
+    }
 
 
     public void rightRotate( INode y){
@@ -170,15 +181,30 @@ public class RedBlackTree implements  IRedBlackTree {
 
         RedBlackTree tree = new RedBlackTree();
 
-        tree.insert(50,1);
-        tree.insert(30,2);
-        tree.insert(20,23);
-        tree.insert(40,32);
-        tree.insert(70,233);
-        tree.insert(60,2333);
-        tree.insert(80,23333);
+        tree.insert(90,90);
+        tree.insert(30,30);
+        tree.insert(20,20);
+        tree.insert(40,40);
+        tree.insert(70,70);
+        tree.insert(60,60);
+        tree.insert(80,80);
+        tree.insert(75,75);
 
-
+        INode x=tree.getRoot();
+        System.out.println(x.getValue());
+        x=x.getLeftChild();
+        System.out.println(x.getValue());
+        x=x.getRightChild();
+        System.out.println(x.getValue());
         System.out.println(tree.search(70));
+        tree.delete(70);
+        System.out.println(tree.search(80));
+        x=x.getRightChild();
+        System.out.println(x.getValue());
+        System.out.println(tree.search(70));
+        System.out.println(tree.search(75));
+
+
+
     }
 }
