@@ -5,6 +5,7 @@ import Tree.INode;
 public class Node implements INode {
     INode leftChild=null,rightChild=null,parent=null;
     Object value;
+    Comparable key;
     boolean color=BLACK;
     @Override
     public void setParent(INode parent) {
@@ -39,12 +40,12 @@ public class Node implements INode {
 
     @Override
     public Comparable getKey() {
-        return null;
+        return this.key;
     }
 
     @Override
     public void setKey(Comparable key) {
-
+        this.key=key;
     }
 
     @Override

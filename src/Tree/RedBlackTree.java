@@ -56,9 +56,13 @@ public class RedBlackTree implements  IRedBlackTree {
         }
         if(root.getKey().compareTo(key)<0){
             root.setRightChild(insertRec(root.getRightChild(),key,value));
+            if(root.getRightChild().getParent() == null)
+                root.getRightChild().setParent(root);
         }
         else if(root.getKey().compareTo(key)>0){
             root.setLeftChild(insertRec(root.getLeftChild(),key,value));
+            if(root.getLeftChild().getParent()==null)
+                root.getLeftChild().setParent(root);
         }
 
         return root;
@@ -122,7 +126,7 @@ public class RedBlackTree implements  IRedBlackTree {
 
 
 
-    public void rightRotate(IRedBlackTree tree, INode y){
+    public void rightRotate( INode y){
         INode x=y.getLeftChild();
         y.setLeftChild(x.getRightChild());
         if(x.getRightChild()!=null){
@@ -141,7 +145,7 @@ public class RedBlackTree implements  IRedBlackTree {
         x.setRightChild(y);
         y.setParent(x);
     }
-    public void leftRotate(IRedBlackTree tree,INode x){
+    public void leftRotate(INode x){
         INode y = x.getRightChild();
         x.setRightChild(y.getLeftChild());
         if(y.getLeftChild()!=null){
@@ -160,7 +164,7 @@ public class RedBlackTree implements  IRedBlackTree {
         y.setLeftChild(x);
         x.setParent(y);
     }
-}
+
 
     public static void main(String[] args) {
 
