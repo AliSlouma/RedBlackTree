@@ -25,7 +25,7 @@ public class RedBlackTree implements  IRedBlackTree {
 
 
     private Object searchRec(INode root, Comparable key) {
-        if(  root!=null){
+        if( !root.isNull() ){
             if(root.getKey().compareTo(key)==0){
                 return  root.getValue();
             }else if(root.getKey().compareTo(key) <0){
@@ -38,29 +38,32 @@ public class RedBlackTree implements  IRedBlackTree {
     }
 
     public Object search(Comparable key) {
-        return searchRec(this.root,key);
+
+        if(key == null)
+            throw new RuntimeErrorException(new Error());
+        if(!isEmpty())
+            return searchRec(this.root,key);
+        return null;
     }
 
     @Override
     public boolean contains(Comparable key) {
+        if(key == null)
+        throw new RuntimeErrorException(new Error());
         if(search(key) != null)
             return true;
         return false;
     }
-
 
     private boolean redUncle(INode x){
         if(x == this.root){
             x.setColor(false);
             return true;
         }
-
         x.getParent().getParent().getLeftChild().setColor(false);
         x.getParent().getParent().getRightChild().setColor(false);
         x.getParent().getParent().setColor(true);
         return false;
-        //    redUncle( x.getParent().getParent());
-
     }
 
     private boolean checkIsLeftChild(INode parent){
@@ -73,12 +76,10 @@ public class RedBlackTree implements  IRedBlackTree {
         // check the place of the uncle
         INode uncle=null;
         if(root.getParent()!=this.root ) {
-
             if (checkIsLeftChild(root.getParent())) {
                 uncle = root.getParent().getParent().getRightChild();
             } else
                 uncle = root.getParent().getParent().getLeftChild();
-
 
             //if uncle is red and parent is not black
             INode alt = root;
@@ -90,17 +91,14 @@ public class RedBlackTree implements  IRedBlackTree {
                     alt.setColor(false);
                     return;
                 }
-
                 if (alt .getParent() != this.root && checkIsLeftChild(alt.getParent())) {
                     uncle = alt.getParent().getParent().getRightChild();
                 } else if(alt .getParent() != this.root && !checkIsLeftChild(alt.getParent()))
                     uncle = alt.getParent().getParent().getLeftChild();
             }
             // uncle is black and parent is not black ==> null is black
-
-            //LLC
             if (alt.getParent().getColor() == true && (uncle.isNull() || uncle.getColor() == false)) {
-
+                //LLC
                 if (alt.getParent().getParent().getLeftChild() == alt.getParent() && alt == alt.getParent().getLeftChild()) {
                     rightRotate(alt.getParent().getParent());
                     alt.getParent().setColor(false);
@@ -108,12 +106,10 @@ public class RedBlackTree implements  IRedBlackTree {
                 }
                 //LRC
                 else if (alt.getParent().getParent().getLeftChild() == alt.getParent() && alt == alt.getParent().getRightChild()) {
-
                     leftRotate(alt.getParent());
                     rightRotate(alt.getParent());
                     alt.setColor(false);
                     alt.getRightChild().setColor(true);
-
                 }
                 //RRC
                 else if (alt.getParent().getParent().getRightChild() == alt.getParent() && alt == alt.getParent().getRightChild()) {
@@ -184,9 +180,6 @@ public class RedBlackTree implements  IRedBlackTree {
 
         if(refNode != null && key !=null  && value !=null)
             R_B_Proberties(this.refNode);
-
-
-
     }
     public boolean delete(Comparable key) {
         root = deleteRec(root, key);
@@ -236,9 +229,7 @@ public class RedBlackTree implements  IRedBlackTree {
         }
         return minv;
     }
-
-
-
+    
     public void rightRotate( INode y){
         INode x=y.getLeftChild();
         y.setLeftChild(x.getRightChild());
