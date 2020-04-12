@@ -6,6 +6,7 @@ import java.awt.*;
 public class RedBlackTree implements  IRedBlackTree {
     INode root = null;
     INode refNode = null;
+    INode tempRoot=null;
     public INode getRoot()
     {
         return this.root;
@@ -139,7 +140,6 @@ public class RedBlackTree implements  IRedBlackTree {
             if(this.root == null){
                 root.setColor(false);
             }
-
             return root;
         }
         //  INode alt;
@@ -182,16 +182,26 @@ public class RedBlackTree implements  IRedBlackTree {
             R_B_Proberties(this.refNode);
     }
     public boolean delete(Comparable key) {
-        root = deleteRec(root, key);
-
+        if(key == null)
+            throw new RuntimeErrorException(new Error());
+        if(!contains(key)){
+            return false;
+        }
+        INode temp=findNode(root,key);
+        boolean originalColor = temp.getColor();
+        root=deleteRec(root,key);
+        if(tempRoot!=null){
+            root=tempRoot;
+            tempRoot=null;
+        }
         return false;
     }
     INode deleteRec(INode root, Comparable key)
     {
-        /* Base Case: If the tree is empty */
-        if (root == null)  return root;
+        //   /Base Case: If the tree is empty
+        if (root.isNull())  return root;
 
-        /* Otherwise, recur down the tree */
+        //     Otherwise, recur down the tree
         if (key.compareTo(root.getKey())<0)
             root.setLeftChild( deleteRec(root.getLeftChild(), key));
         else if (key.compareTo(root.getKey())>0)
@@ -202,34 +212,143 @@ public class RedBlackTree implements  IRedBlackTree {
         else
         {
             // node with only one child or no child
-            if (root.getLeftChild() == null)
+            if (root.getLeftChild().isNull() || root.getRightChild().isNull()){
+                  // a red note to be deleted or black that has a red child
+                    if( root.getLeftChild().isNull()&&(root.getRightChild().getColor() || root.getColor()) ){
+                        root.getRightChild().setColor(false);
+                        return root.getRightChild();
+                    }
+                    // a red note to be deleted or black that has a red child
+                    else if (root.getRightChild().isNull()&&(root.getLeftChild().getColor() || root.getColor())){
+                        root.getLeftChild().setColor(false);
+                        return root.getLeftChild();
+                    }
+                    else{
+                        if(root.getLeftChild().isNull()){
+                            ((Node)root.getRightChild()).setDoubleBlack(false);}
+                        else{
+                            ((Node)root.getLeftChild()).setDoubleBlack(false);}
+                        if(root==root.getParent().getLeftChild()){
+                          if(!root.getParent().getRightChild().getColor()){
+                              //right sibling black-right child red
+                             if(root.getParent().getRightChild().getRightChild().getColor()   ){
+                                root.getParent().getRightChild().getRightChild().setColor(false);
+                                leftRotate(root.getParent());
+
+                                }
+                             //right sibling black-left child red
+                             else if(root.getParent().getRightChild().getLeftChild().getColor()){
+                                 root.getParent().getRightChild().getLeftChild().setColor(false);
+                                    rightRotate(root.getParent().getRightChild());
+                                    leftRotate(root.getParent());
+                             }
+
+                            }
+                          //right sibling red
+                          else if (root.getParent().getRightChild().getColor()){
+                              root.getParent().getRightChild().setColor(false);
+                              root.getParent().getRightChild().getLeftChild().setColor(true);
+                              leftRotate(root.getParent());
+
+                          }
+                          else {
+                              //right sibling black with 2 black children (nigga tree)
+                              root.getParent().getRightChild().setColor(true);
+
+                          }
+
+
+                        }
+                        else if(root==root.getParent().getRightChild()){
+                            if(!root.getParent().getLeftChild().getColor()){
+                                //left sibling black -left child red
+                                if(root.getParent().getLeftChild().getLeftChild().getColor()   ){
+                                    root.getParent().getLeftChild().getLeftChild().setColor(false);
+                                    rightRotate(root.getParent());
+
+                                }
+                                //left sibling black-right child red
+                                else if(root.getParent().getLeftChild().getRightChild().getColor()){
+                                    root.getParent().getLeftChild().getRightChild().setColor(false);
+                                    leftRotate(root.getParent().getLeftChild());
+                                    rightRotate(root.getParent());
+                                }
+
+                            }
+                            //left sibling red
+                            else if (root.getParent().getLeftChild().getColor()){
+                                root.getParent().getLeftChild().setColor(false);
+                                root.getParent().getLeftChild().getRightChild().setColor(true);
+                                rightRotate(root.getParent());
+
+                            }
+                            else {
+                                //right sibling black with 2 black children (nigga tree)
+                                root.getParent().getLeftChild().setColor(true);
+
+                            }
+                        }
+                             if(root.getLeftChild().isNull()){
+                                  ((Node)root.getRightChild()).setDoubleBlack(false);}
+                                else{
+                                 ((Node)root.getLeftChild()).setDoubleBlack(false);}
+                        }
                 return root.getRightChild();
-            else if (root.getRightChild() == null)
-                return root.getLeftChild();
+            }
+
 
             // node with two children: Get the inorder successor (smallest
             // in the right subtree)
-            root.setKey(minValue(root.getRightChild()));
-
+            root.setKey(minKey(root.getRightChild()));
+            root.setValue(minValue(root.getRightChild()));
             // Delete the inorder successor
-            root.setRightChild(deleteRec(root.getRightChild(), root.getKey()));
+           root.setRightChild(deleteRec(root.getRightChild(), root.getKey()));
         }
 
 
         return root;
     }
 
-    Comparable minValue(INode root)
+    INode findNode(INode root,Comparable key){
+
+        if (root == null)  return root;
+        INode temp=root;
+        while (key.compareTo(temp.getKey())!=0) {
+            if (key.compareTo(temp.getKey()) < 0){
+                temp=temp.getLeftChild();
+            }
+
+            else if (key.compareTo(temp.getKey()) > 0){
+                temp=temp.getRightChild();
+            }
+
+        }
+        return temp;
+    }
+
+    Comparable minKey(INode root)
     {
         Comparable minv = root.getKey();
-        while (root.getLeftChild() != null)
+        while (!root.getLeftChild().isNull())
         {
             minv = root.getLeftChild().getKey();
             root = root.getLeftChild();
         }
         return minv;
     }
-    
+    Object minValue(INode root)
+    {
+        Comparable minv = root.getKey();
+        Object val=root.getValue();
+        while (!root.getLeftChild().isNull())
+        {
+            minv = root.getLeftChild().getKey();
+            val=root.getLeftChild().getValue();
+            root = root.getLeftChild();
+        }
+        return val;
+    }
+
     public void rightRotate( INode y){
         INode x=y.getLeftChild();
         y.setLeftChild(x.getRightChild());
@@ -239,6 +358,7 @@ public class RedBlackTree implements  IRedBlackTree {
         x.setParent(y.getParent());
         if(y.getParent()==null) {
             root=x;
+            tempRoot=x;
         }
         else if(y==y.getParent().getRightChild()){
             y.getParent().setRightChild(x);
@@ -258,6 +378,7 @@ public class RedBlackTree implements  IRedBlackTree {
         y.setParent(x.getParent());
         if(x.getParent()==null){
             root=y;
+            tempRoot=y;
         }
         else if (x==x.getParent().getLeftChild()){
             x.getParent().setLeftChild(y);
@@ -274,15 +395,61 @@ public class RedBlackTree implements  IRedBlackTree {
 
         RedBlackTree tree = new RedBlackTree();
 
-        tree.insert(11,2221);
-        tree.insert(1,2222);
-        tree.insert(14,2322);
-        tree.insert(2,32222);
-        tree.insert(7,2332);
-        tree.insert(15,2333);
-        //tree.insert(80,23333);
+        tree.insert(90,90);
+        tree.insert(30,30);
+        tree.insert(20,20);
+        tree.insert(40,40);
+        tree.insert(70,70);
+        tree.insert(60,60);
+        tree.insert(80,80);
+        tree.insert(50,50);
+        tree.insert(10,10);
+      tree.delete(10);
+      tree.insert(39,39);
+        tree.delete(50);
 
-        System.out.println(tree.getRoot().getValue());
-        System.out.println(tree.search(70));
+
+
+
+
+
+        INode x=tree.getRoot();
+
+
+
+
+
+
+
     }
 }
+/*
+if(temp.getColor()==true){
+            root=deleteRec(root,key);
+            return true;
+        }
+        else if(temp.getColor()==temp.getRightChild().isNull() && (temp.getLeftChild().isNull())){
+            temp.getRightChild().setColor(false);
+            root=deleteRec(root,key);
+            return true;
+        }
+        else if(temp.getColor()==temp.getLeftChild().isNull() && (temp.getRightChild().isNull())){
+            temp.getLeftChild().setColor(false);
+            root=deleteRec(root,key);
+            return true;
+        }
+
+     //   root = deleteRec(root, key);
+        System.out.println("special case");
+ */
+
+/*
+        tree.insert(90,90);
+        tree.insert(30,30);
+        tree.insert(20,20);
+        tree.insert(40,40);
+        tree.insert(70,70);
+        tree.insert(60,60);
+        tree.insert(80,80);
+        tree.insert(75,75);
+ */

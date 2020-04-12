@@ -7,6 +7,10 @@ public class Node implements INode {
     Object value;
     Comparable key =null;
     boolean color;
+    boolean doubleBlack=false;
+
+
+
     @Override
     public void setParent(INode parent) {
     this.parent=parent;
@@ -79,6 +83,13 @@ public class Node implements INode {
         if(this.key == null && this.value == null)
             return true;
         return false;
+    }
+    public boolean isDoubleBlack() {
+        return doubleBlack;
+    }
+
+    public void setDoubleBlack(boolean doubleBlack) {
+        this.doubleBlack = doubleBlack;
     }
 
 }
