@@ -2,6 +2,7 @@ package Tree;
 
 import javax.management.RuntimeErrorException;
 import java.awt.*;
+import java.util.Random;
 
 public class RedBlackTree implements  IRedBlackTree {
     INode root = null;
@@ -182,11 +183,12 @@ public class RedBlackTree implements  IRedBlackTree {
             R_B_Proberties(this.refNode);
     }
     public boolean delete(Comparable key) {
-        if(key == null)
-            throw new RuntimeErrorException(new Error());
         if(!contains(key)){
             return false;
         }
+        if(key == null)
+            throw new RuntimeErrorException(new Error());
+
         INode temp=findNode(root,key);
         boolean originalColor = temp.getColor();
         root=deleteRec(root,key);
@@ -194,7 +196,7 @@ public class RedBlackTree implements  IRedBlackTree {
             root=tempRoot;
             tempRoot=null;
         }
-        return false;
+        return true;
     }
     INode deleteRec(INode root, Comparable key)
     {
@@ -210,50 +212,132 @@ public class RedBlackTree implements  IRedBlackTree {
             // if key is same as root's key, then This is the node
             // to be deleted
         else
-        {
+        {               if (root.getParent()==null){
+            return null;
+        }
             // node with only one child or no child
             if (root.getLeftChild().isNull() || root.getRightChild().isNull()){
                   // a red note to be deleted or black that has a red child
                     if( root.getLeftChild().isNull()&&(root.getRightChild().getColor() || root.getColor()) ){
                         root.getRightChild().setColor(false);
+                        root.getRightChild().setParent(root.getParent());
                         return root.getRightChild();
                     }
                     // a red note to be deleted or black that has a red child
                     else if (root.getRightChild().isNull()&&(root.getLeftChild().getColor() || root.getColor())){
                         root.getLeftChild().setColor(false);
+                        root.getLeftChild().setParent(root.getParent());
                         return root.getLeftChild();
                     }
                     else{
                         if(root.getLeftChild().isNull()){
-                            ((Node)root.getRightChild()).setDoubleBlack(false);}
+                            ((Node)root.getRightChild()).setDoubleBlack(true);}
                         else{
-                            ((Node)root.getLeftChild()).setDoubleBlack(false);}
+                            ((Node)root.getLeftChild()).setDoubleBlack(true);}
                         if(root==root.getParent().getLeftChild()){
                           if(!root.getParent().getRightChild().getColor()){
+                              if( (root.getParent().getRightChild().getLeftChild()==null &&
+                                      root.getParent().getRightChild().getRightChild()==null) ||
+                                      (root.getParent().getRightChild().getLeftChild().isNull() &&
+                                              root.getParent().getRightChild().getRightChild().isNull())) {
+                                  //right sibling black with 2 black children (nigga tree)
+                                  INode temp=root;
+                                  while (temp.getParent()!=null ){
+                                      if(temp.getParent().getColor()){
+                                          temp.getParent().setColor(false);
+                                           temp.getParent().getRightChild().setColor(true);
+                                          break;
+                                      }
+                                      else{
+                                          temp.getParent().getRightChild().setColor(true);
+                                          temp=temp.getParent();
+                                      }
+                                  }
+
+                              }
                               //right sibling black-right child red
-                             if(root.getParent().getRightChild().getRightChild().getColor()   ){
-                                root.getParent().getRightChild().getRightChild().setColor(false);
-                                leftRotate(root.getParent());
+                             else  if(root.getParent().getRightChild().getRightChild()!=null) {
+                                  if (root.getParent().getRightChild().getRightChild().getColor() == true) {
+                                      root.getParent().getRightChild().setColor(root.getParent().getColor());
+                                      root.getParent().setColor(false);
+                                      root.getParent().getRightChild().getRightChild().setColor(false);
+                                      leftRotate(root.getParent());
 
-                                }
-                             //right sibling black-left child red
-                             else if(root.getParent().getRightChild().getLeftChild().getColor()){
-                                 root.getParent().getRightChild().getLeftChild().setColor(false);
-                                    rightRotate(root.getParent().getRightChild());
-                                    leftRotate(root.getParent());
-                             }
+                                  }
 
+                                  //right sibling black-left child red
+                                  else if (root.getParent().getRightChild().getLeftChild()!=null){
+                                   if (root.getParent().getRightChild().getLeftChild().getColor() == true) {
+                                      root.getParent().getRightChild().getLeftChild().setColor(false);
+                                      root.getParent().setColor(false);
+                                      rightRotate(root.getParent().getRightChild());
+                                      leftRotate(root.getParent());
+                                    }
+                                  }
+                              }
                             }
                           //right sibling red
-                          else if (root.getParent().getRightChild().getColor()){
+                          else if (root.getParent().getRightChild().getColor() == true){
                               root.getParent().getRightChild().setColor(false);
-                              root.getParent().getRightChild().getLeftChild().setColor(true);
+                              root.getParent().setColor(true);
                               leftRotate(root.getParent());
+
+                              // now case 3 occurs : find which sub-case
+                              if( (root.getParent().getRightChild().getLeftChild()==null &&
+                                      root.getParent().getRightChild().getRightChild()==null)) {
+                                  //right sibling black with 2 black children (nigga tree)
+                                  INode temp=root;
+                                  while (temp.getParent()!=null){
+                                      if(temp.getParent().getColor()){
+                                          temp.getParent().setColor(false);
+                                          if(!temp.getParent().getRightChild().getRightChild().getColor() &&!temp.getParent().getRightChild().getLeftChild().getColor())
+                                          { temp.getParent().getRightChild().setColor(true);}
+                                          break;
+                                      }
+                                      else{
+                                          temp.getParent().getRightChild().setColor(true);
+                                          temp=temp.getParent();
+                                      }
+                                  }
+
+                              }
+                              //right sibling black-right child red
+                              else  if(root.getParent().getRightChild().getRightChild()!=null) {
+                                  if (root.getParent().getRightChild().getRightChild().getColor() == true) {
+                                      root.getParent().getRightChild().setColor(root.getParent().getColor());
+                                      root.getParent().setColor(false);
+                                      root.getParent().getRightChild().getRightChild().setColor(false);
+                                      leftRotate(root.getParent());
+
+                                  }
+
+                                  //right sibling black-left child red
+                                  else if (root.getParent().getRightChild().getLeftChild()!=null){
+                                      if (root.getParent().getRightChild().getLeftChild().getColor() == true) {
+                                          root.getParent().getRightChild().getLeftChild().setColor(false);
+                                          root.getParent().setColor(false);
+                                          rightRotate(root.getParent().getRightChild());
+                                          leftRotate(root.getParent());
+                                      }
+                                  }
+                              }
 
                           }
                           else {
                               //right sibling black with 2 black children (nigga tree)
-                              root.getParent().getRightChild().setColor(true);
+                              INode temp=root;
+                              while (temp.getParent()!=null){
+                                  if(temp.getParent().getColor()){
+                                      temp.getParent().setColor(false);
+                                      if(!temp.getParent().getRightChild().getRightChild().getColor() &&!temp.getParent().getRightChild().getLeftChild().getColor())
+                                      { temp.getParent().getRightChild().setColor(true);}
+                                      break;
+                                  }
+                                  else{
+                                      temp.getParent().getRightChild().setColor(true);
+                                      temp=temp.getParent();
+                                  }
+                              }
 
                           }
 
@@ -261,32 +345,98 @@ public class RedBlackTree implements  IRedBlackTree {
                         }
                         else if(root==root.getParent().getRightChild()){
                             if(!root.getParent().getLeftChild().getColor()){
-                                //left sibling black -left child red
-                                if(root.getParent().getLeftChild().getLeftChild().getColor()   ){
-                                    root.getParent().getLeftChild().getLeftChild().setColor(false);
-                                    rightRotate(root.getParent());
+                                if( (root.getParent().getLeftChild().getLeftChild()==null &&
+                                        root.getParent().getLeftChild().getRightChild()==null)
+                                 || (root.getParent().getLeftChild().getLeftChild()!=null &&
+                                        root.getParent().getLeftChild().getRightChild()!=null) ) {
+                                    //left sibling black with 2 black children (nigga tree)
+                                    INode temp=root;
+                                    while (temp.getParent()!=null){
+                                        if(temp.getParent().getColor()){
+                                            temp.getParent().setColor(false);
+                                            if(!temp.getParent().getLeftChild().getRightChild().getColor() &&!temp.getParent().getLeftChild().getLeftChild().getColor())
+                                            { temp.getParent().getLeftChild().setColor(true);}
+                                            break;
+                                        }
+                                        else{
+                                            temp.getParent().getLeftChild().setColor(true);
+                                            temp=temp.getParent();
+                                        }
+                                    }
 
                                 }
-                                //left sibling black-right child red
-                                else if(root.getParent().getLeftChild().getRightChild().getColor()){
-                                    root.getParent().getLeftChild().getRightChild().setColor(false);
-                                    leftRotate(root.getParent().getLeftChild());
-                                    rightRotate(root.getParent());
-                                }
+                                if(root.getParent().getLeftChild().getLeftChild()!=null) {
+                                    //left sibling black -left child red
+                                    if (root.getParent().getLeftChild().getLeftChild().getColor() == true) {
+                                        root.getParent().getLeftChild().setColor(root.getParent().getColor());
+                                        root.getParent().setColor(false);
+                                        root.getParent().getLeftChild().getLeftChild().setColor(false);
+                                        rightRotate(root.getParent());
 
+                                    }
+
+                                    //left sibling black-right child red
+                                    else if (root.getParent().getLeftChild().getRightChild() != null){
+                                     if (root.getParent().getLeftChild().getRightChild().getColor() == true) {
+                                        root.getParent().getLeftChild().getRightChild().setColor(false);
+                                        root.getParent().setColor(false);
+                                        leftRotate(root.getParent().getLeftChild());
+                                        rightRotate(root.getParent());
+
+
+                                    }
+                                }
+                                }
                             }
                             //left sibling red
                             else if (root.getParent().getLeftChild().getColor()){
                                 root.getParent().getLeftChild().setColor(false);
-                                root.getParent().getLeftChild().getRightChild().setColor(true);
+                                root.getParent().setColor(true);
                                 rightRotate(root.getParent());
+                                //case 3 occurs : find which sub-case
+
+                                if( (root.getParent().getLeftChild().getLeftChild()==null &&
+                                        root.getParent().getLeftChild().getRightChild()==null)
+                                || (root.getParent().getLeftChild().getLeftChild().isNull() &&
+                                        root.getParent().getLeftChild().getRightChild().isNull() )) {
+                                    //left sibling black with 2 black children (nigga tree)
+                                    INode temp=root;
+                                    while (temp.getParent()!=null){
+                                        if(temp.getParent().getColor()){
+                                            temp.getParent().setColor(false);
+                                             temp.getParent().getLeftChild().setColor(true);
+                                            break;
+                                        }
+                                        else{
+                                            temp.getParent().getLeftChild().setColor(true);
+                                            temp=temp.getParent();
+                                        }
+                                    }
+
+                                }
+                                if(root.getParent().getLeftChild().getLeftChild()!=null){
+                                    //left sibling black -left child red
+                                    if(root.getParent().getLeftChild().getLeftChild().getColor()==true   ){
+                                        root.getParent().getLeftChild().setColor(root.getParent().getColor());
+                                        root.getParent().setColor(false);
+                                        root.getParent().getLeftChild().getLeftChild().setColor(false);
+                                        rightRotate(root.getParent());
+
+                                    }
+                                }
+                                //left sibling black-right child red
+                                else if(root.getParent().getLeftChild().getRightChild().getColor()){
+                                    root.getParent().getLeftChild().getRightChild().setColor(false);
+                                    root.getParent().setColor(false);
+                                    leftRotate(root.getParent().getLeftChild());
+                                    rightRotate(root.getParent());
+
+
+                                }
+
 
                             }
-                            else {
-                                //right sibling black with 2 black children (nigga tree)
-                                root.getParent().getLeftChild().setColor(true);
 
-                            }
                         }
                              if(root.getLeftChild().isNull()){
                                   ((Node)root.getRightChild()).setDoubleBlack(false);}
@@ -395,25 +545,25 @@ public class RedBlackTree implements  IRedBlackTree {
 
         RedBlackTree tree = new RedBlackTree();
 
-        tree.insert(90,90);
-        tree.insert(30,30);
-        tree.insert(20,20);
-        tree.insert(40,40);
-        tree.insert(70,70);
-        tree.insert(60,60);
-        tree.insert(80,80);
-        tree.insert(50,50);
-        tree.insert(10,10);
-      tree.delete(10);
-      tree.insert(39,39);
-        tree.delete(50);
+        Random r = new Random();
+        int[] x =new int[100];
+      for(int i=0;i<100;i++){
+          int z=r.nextInt(100);
+          tree.insert(z,z);
+          x[i]=z;
+
+      }
+      for (int i=0;i<100;i++){
+          tree.delete(x[i]);
+        }
+        System.out.println(tree.getRoot());
 
 
 
 
 
 
-        INode x=tree.getRoot();
+
 
 
 
@@ -423,33 +573,3 @@ public class RedBlackTree implements  IRedBlackTree {
 
     }
 }
-/*
-if(temp.getColor()==true){
-            root=deleteRec(root,key);
-            return true;
-        }
-        else if(temp.getColor()==temp.getRightChild().isNull() && (temp.getLeftChild().isNull())){
-            temp.getRightChild().setColor(false);
-            root=deleteRec(root,key);
-            return true;
-        }
-        else if(temp.getColor()==temp.getLeftChild().isNull() && (temp.getRightChild().isNull())){
-            temp.getLeftChild().setColor(false);
-            root=deleteRec(root,key);
-            return true;
-        }
-
-     //   root = deleteRec(root, key);
-        System.out.println("special case");
- */
-
-/*
-        tree.insert(90,90);
-        tree.insert(30,30);
-        tree.insert(20,20);
-        tree.insert(40,40);
-        tree.insert(70,70);
-        tree.insert(60,60);
-        tree.insert(80,80);
-        tree.insert(75,75);
- */
