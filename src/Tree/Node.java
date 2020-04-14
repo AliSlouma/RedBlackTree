@@ -29,16 +29,19 @@ public class Node implements INode {
 
     @Override
     public INode getLeftChild() {
+
         return this.leftChild;
     }
 
     @Override
     public void setRightChild(INode rightChild) {
-    this.rightChild=rightChild;
+
+        this.rightChild=rightChild;
     }
 
     @Override
     public INode getRightChild() {
+
         return this.rightChild;
     }
 
@@ -64,6 +67,9 @@ public class Node implements INode {
 
     @Override
     public boolean getColor() {
+        if(this==null){
+            return false;
+        }
         return this.color;
 
     }

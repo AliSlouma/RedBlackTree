@@ -1,6 +1,7 @@
 package Tree;
 
 import javax.management.RuntimeErrorException;
+import java.nio.MappedByteBuffer;
 import java.util.*;
 
 public class TreeMap implements ITreeMap {
@@ -10,7 +11,7 @@ public class TreeMap implements ITreeMap {
     Set <Map.Entry>set = new LinkedHashSet<>();
     Set <Comparable>keySet = new LinkedHashSet<>();
     ArrayList<Map.Entry> arr = new ArrayList<>();
-    Map.Entry lastEntry;
+    Map.Entry lastEntry= null;
 
 
     public TreeMap() {
@@ -183,19 +184,39 @@ public class TreeMap implements ITreeMap {
     }
 
     @Override
-    public Map.Entry pollFirstEntry() {
-        return null;
+    public Map.Entry pollFirstEntry(){
+        Map.Entry entry = firstEntry();
+        if(entry == null){
+            return null;
+        }
+        this.set.remove(entry);
+      //  treemap.delete((Comparable) entry.getKey());
+        remove((Comparable) entry.getKey());
+
+        return entry;
     }
 
     @Override
     public Map.Entry pollLastEntry() {
-        return null;
+        Map.Entry entry = lastEntry();
+
+        if(lastEntry == null){
+            return null;
+        }
+        lastEntry = null;
+       // treemap.delete((Comparable) entry.getKey());
+        remove((Comparable) entry.getKey());
+
+        return entry;
     }
 
     @Override
     public void put(Comparable key, Object value) {
+        if(!containsKey(key)){
+            size++;
+        }
         treemap.insert(key,value);
-        size++;
+
     }
 
     @Override
@@ -208,7 +229,10 @@ public class TreeMap implements ITreeMap {
 
     @Override
     public boolean remove(Comparable key) {
-        return false;
+        this.size--;
+       return treemap.delete(key);
+
+       // return false;
     }
 
     @Override
