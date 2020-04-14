@@ -4,7 +4,7 @@ import Tree.INode;
 
 public class Node implements INode {
     INode leftChild=null,rightChild=null,parent=null;
-    Object value;
+    Object value = null;
     Comparable key =null;
     boolean color;
     boolean doubleBlack=false;
