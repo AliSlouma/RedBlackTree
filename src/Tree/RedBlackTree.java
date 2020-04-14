@@ -5,9 +5,14 @@ import java.awt.*;
 import java.util.Random;
 
 public class RedBlackTree implements  IRedBlackTree {
-    INode root = null;
-    INode refNode = null;
+   // INode root = null;
+   // INode refNode = null;
     INode tempRoot=null;
+    private INode root = new Node();
+    private INode refNode = null;
+    private INode pre;
+    private INode suc;
+    private boolean existKey=false;
     public INode getRoot()
     {
         return this.root;
@@ -15,14 +20,50 @@ public class RedBlackTree implements  IRedBlackTree {
 
     @Override
     public boolean isEmpty() {
-        if(root == null)
+        if(root.isNull())
             return true;
         return false;
     }
 
     @Override
     public void clear() {
-        root=null;
+        root = new Node();
+    }
+
+    public void Pre_Succ(INode root,Comparable key){
+        if(root==null || root.isNull()){
+            return;
+        }
+        if(root.getKey().compareTo(key) == 0){
+            if(!root.getLeftChild().isNull()) {
+                INode temp = root.getLeftChild();
+                while (!temp.getRightChild().isNull()) {
+                    temp = temp.getRightChild();
+                }
+                pre = temp;
+            }
+            if(!root.getRightChild().isNull()) {
+                INode temp = root.getRightChild();
+                while (!temp.getLeftChild().isNull()) {
+                    temp = temp.getLeftChild();
+                }
+                suc = temp;
+            }
+            return;
+        }
+        if(root.getKey().compareTo(key) > 0){
+            suc = root;
+            Pre_Succ(root.getLeftChild(),key);
+        }else {
+            pre =root;
+            Pre_Succ(root.getRightChild(),key);
+        }
+    }
+    public INode getPre(){
+        return this.pre;
+    }
+    public INode getSuc(){
+        return this.suc;
     }
 
 
@@ -58,10 +99,6 @@ public class RedBlackTree implements  IRedBlackTree {
     }
 
     private boolean redUncle(INode x){
-        if(x == this.root){
-            x.setColor(false);
-            return true;
-        }
         x.getParent().getParent().getLeftChild().setColor(false);
         x.getParent().getParent().getRightChild().setColor(false);
         x.getParent().getParent().setColor(true);
@@ -77,17 +114,16 @@ public class RedBlackTree implements  IRedBlackTree {
     private void R_B_Proberties(INode root){
         // check the place of the uncle
         INode uncle=null;
-        if(root.getParent()!=this.root ) {
+        if(root.getParent()!=this.root){
             if (checkIsLeftChild(root.getParent())) {
                 uncle = root.getParent().getParent().getRightChild();
             } else
                 uncle = root.getParent().getParent().getLeftChild();
-
             //if uncle is red and parent is not black
             INode alt = root;
             while (alt.getParent().getColor() == true && !uncle.isNull() && uncle.getColor() == true) {
+                //System.out.println("red");
                 redUncle(alt);
-
                 alt = alt.getParent().getParent();
                 if (alt == this.root){
                     alt.setColor(false);
@@ -97,78 +133,79 @@ public class RedBlackTree implements  IRedBlackTree {
                     uncle = alt.getParent().getParent().getRightChild();
                 } else if(alt .getParent() != this.root && !checkIsLeftChild(alt.getParent()))
                     uncle = alt.getParent().getParent().getLeftChild();
+                else if(alt.getParent() == this.root){
+                    break;
+                }
             }
             // uncle is black and parent is not black ==> null is black
             if (alt.getParent().getColor() == true && (uncle.isNull() || uncle.getColor() == false)) {
                 //LLC
                 if (alt.getParent().getParent().getLeftChild() == alt.getParent() && alt == alt.getParent().getLeftChild()) {
                     rightRotate(alt.getParent().getParent());
-                    alt.getParent().setColor(false);
-                    alt.getParent().getRightChild().setColor(true);
+                    boolean c = alt.getParent().getColor();
+                    alt.getParent().setColor(alt.getParent().getRightChild().getColor());
+                    alt.getParent().getRightChild().setColor(c);
+                   // System.out.println("LLC");
                 }
                 //LRC
                 else if (alt.getParent().getParent().getLeftChild() == alt.getParent() && alt == alt.getParent().getRightChild()) {
                     leftRotate(alt.getParent());
                     rightRotate(alt.getParent());
-                    alt.setColor(false);
-                    alt.getRightChild().setColor(true);
+                    boolean c = alt.getColor();
+                    alt.setColor(alt.getRightChild().getColor());
+                    alt.getRightChild().setColor(c);
+                   // System.out.println("LRC");
                 }
                 //RRC
                 else if (alt.getParent().getParent().getRightChild() == alt.getParent() && alt == alt.getParent().getRightChild()) {
                     leftRotate(alt.getParent().getParent());
-                    alt.getParent().setColor(false);
-                    alt.getParent().getLeftChild().setColor(true);
+                    boolean c = alt.getParent().getColor();
+                    alt.getParent().setColor(alt.getParent().getLeftChild().getColor());
+                    alt.getParent().getLeftChild().setColor(c);
+                   // System.out.println("RRC");
                 }
                 //RLC
                 else if (alt.getParent().getParent().getRightChild() == alt.getParent() && alt == alt.getParent().getLeftChild()) {
                     rightRotate(alt.getParent());
                     leftRotate(alt.getParent());
-                    alt.setColor(false);
-                    alt.getLeftChild().setColor(true);
+                    boolean c = alt.getColor();
+                    alt.setColor(alt.getLeftChild().getColor());
+                    alt.getLeftChild().setColor(c);
+                   // System.out.println("RLC");
                 }
+
             }
         }
     }
 
     private INode insertRec(INode root , Comparable key , Object value){
-        if(root== null || root.isNull()){
-            root = new Node();
+        if( root.isNull()){
             root.setKey(key);
             root.setValue(value);
             root.setColor(INode.RED);
             root.setRightChild(new Node());
             root.setLeftChild(new Node());
-            if(this.root == null){
+            root.getRightChild().setParent(root);
+            root.getLeftChild().setParent(root);
+            this.refNode = root;
+            if(this.root == root){
                 root.setColor(false);
             }
             return root;
         }
-        //  INode alt;
         if(root.getKey().compareTo(key)==0){
             root.setValue(value);
+            existKey = true;
+            return root;
         }
         else if(root.getKey().compareTo(key)<0){
             root.setRightChild(insertRec(root.getRightChild(),key,value));
-            if(root.getRightChild().getParent() == null){
-                root.getRightChild().setParent(root);
-                //R_B_Proberties(root.getRightChild());
-                this.refNode = root.getRightChild();
-            }
-
         }
         else if(root.getKey().compareTo(key)>0){
             root.setLeftChild(insertRec(root.getLeftChild(),key,value));
-            if(root.getLeftChild().getParent()==null){
-                root.getLeftChild().setParent(root);
-                // R_B_Proberties(root.getLeftChild());
-                this.refNode = root.getLeftChild();
-            }
-
         }
 
         return root;
-
-
     }
 
     public void insert(Comparable key, Object value) {
@@ -179,8 +216,11 @@ public class RedBlackTree implements  IRedBlackTree {
         else
             throw new RuntimeErrorException(new Error());
 
-        if(refNode != null && key !=null  && value !=null)
+        if(refNode != this.root && !existKey)
             R_B_Proberties(this.refNode);
+        else
+            existKey =false;
+
     }
     public boolean delete(Comparable key) {
         if(!contains(key)){
